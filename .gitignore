@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# ParkFly local caches (large downloads, rebuilt by the pipeline)
+data/fly/
+data/birmingham/
+__pycache__/
+.vercel

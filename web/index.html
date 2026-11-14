@@ -1,125 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Park Shark · NC State — Fly Brain Parking</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ParkFly · Park Shark × Fly Brain · NC State</title>
+<meta name="description" content="Sense 25% of the parking spots, infer the other 75%, and let a real fruit-fly connectome decide where to park.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦈</text></svg>">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<script src="vendor/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Changa+One&display=swap" rel="stylesheet">
-<style>
-:root{--rust:#D8814B;--navy:#0D3F5A;--bg:#f6f4f0;--card:#fff;--ink:#1d2730;--mut:#5c6b77}
-*{box-sizing:border-box;margin:0}
-body{font-family:Barlow,sans-serif;color:var(--ink);background:var(--bg);height:100vh;display:flex;overflow:hidden}
-#side{width:390px;min-width:330px;display:flex;flex-direction:column;background:var(--card);box-shadow:2px 0 12px rgba(13,63,90,.12);z-index:1000}
-#map{flex:1}
-header{background:var(--navy);color:#fff;padding:14px 16px}
-header h1{font-family:'Changa One',cursive;font-weight:400;font-size:22px;letter-spacing:.5px}
-header h1 span{color:var(--rust)}
-header p{font-size:12.5px;opacity:.85;margin-top:3px}
-#scen{padding:10px 16px;border-bottom:1px solid #e5e0d8;font-size:13px}
-#scen b{color:var(--navy)}
-#hourRow{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #e5e0d8}
-#hourRow input{flex:1;accent-color:var(--rust)}
-#hourLbl{font-weight:700;color:var(--navy);width:88px;font-size:14px}
-#list{flex:1;overflow-y:auto;padding:10px 12px}
-.lot{background:#fff;border:1px solid #e5e0d8;border-radius:10px;padding:10px 12px;margin-bottom:9px;cursor:pointer;transition:border .15s}
-.lot:hover,.lot.sel{border-color:var(--rust)}
-.lot h3{font-size:14.5px;color:var(--navy);display:flex;justify-content:space-between;gap:6px}
-.lot h3 .v{font-size:12px;white-space:nowrap}
-.meta{font-size:12px;color:var(--mut);margin:3px 0 6px}
-.bars{display:grid;grid-template-columns:52px 1fr 34px;gap:3px 7px;font-size:11px;align-items:center}
-.bar{height:7px;border-radius:4px;background:#eee;overflow:hidden}
-.bar i{display:block;height:100%}
-.est{font-size:12px;margin-top:6px;color:var(--ink)}
-.est b{color:var(--navy)}
-.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.4px;padding:1px 7px;border-radius:9px;background:#fdf0e6;color:var(--rust);border:1px solid var(--rust)}
-footer{padding:9px 14px;font-size:10.5px;color:var(--mut);border-top:1px solid #e5e0d8;line-height:1.45}
-.fly{font-size:12px;margin-top:5px;padding:5px 8px;border-radius:7px;background:#eef4f8;color:var(--navy)}
-.fly.eat{background:#e8f3e8;color:#1d6b2e}.fly.flee{background:#fce8e6;color:#b3261e}.fly.back{background:#fef7e0;color:#8a6d00}
-.legend{position:absolute;bottom:18px;right:12px;z-index:900;background:#fff;border-radius:9px;padding:9px 12px;font:12px Barlow;box-shadow:0 2px 10px rgba(0,0,0,.18)}
-.legend i{display:inline-block;width:11px;height:11px;border-radius:6px;margin-right:5px;vertical-align:-1px}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="side">
-  <header>
-    <h1>PARK <span>SHARK</span> · NC STATE</h1>
-    <p>A hungry fly (139k real neurons) hunting the sweetest parking spot</p>
-  </header>
-  <div id="scen"></div>
-  <div id="hourRow"><span id="hourLbl"></span><input id="hour" type="range" min="0" max="23" step="1"></div>
-  <div id="list"></div>
-  <footer><b>Honest numbers:</b> every occupancy value is a model <b>estimate</b> from assumed hour
-  templates — no sensor has ever reported from these lots. Bands show that uncertainty. Lot names,
-  capacities and permit-type space counts come from NCSU Transportation GIS when loaded (seed data is
-  flagged). Permit rules simplified — posted signs control. Fly verdicts come from the FlyWire/Shiu
-  whole-brain simulation run in Colab.</footer>
-</div>
-<div id="map"></div>
-<div class="legend"><div><i style="background:#2e8b57"></i>likely open spot</div>
-<div><i style="background:#f29900"></i>uncertain</div><div><i style="background:#d93025"></i>likely full / filling</div>
-<div style="margin-top:4px"><i style="background:#0D3F5A"></i>destination</div></div>
-<script>
-const $=id=>document.getElementById(id);
-let D=null, DEC=null, map, layers=[], sel=null;
-const col=p=> p>.6?"#2e8b57":p>.3?"#f29900":"#d93025";
-const vClass=v=> v&&v.startsWith("EAT")?"eat":v&&v.startsWith("FLEE")?"flee":"back";
+<header id="top">
+  <div class="brand">
+    <div class="logo">PARK <span>SHARK</span> <em>×</em> FLY BRAIN</div>
+    <div class="sub">NC State Hack Day · sense a few spots, infer the rest, let a real fly brain decide</div>
+  </div>
+  <div class="sensorbox">
+    <div class="sensorhead">
+      <span class="lbl">Spots with sensors</span>
+      <span id="pctVal" class="pct">25%</span>
+      <span id="pctNote" class="note"></span>
+    </div>
+    <div class="sliderwrap">
+      <div class="zone" title="Park Shark's target coverage: 20 to 30%"></div>
+      <input id="pct" type="range" min="0" max="100" step="1" value="25" aria-label="Percent of spots with sensors">
+    </div>
+  </div>
+  <div class="topctl">
+    <label>Placement
+      <select id="strategy">
+        <option value="scatter">Scattered spots</option>
+        <option value="spread">Spread sensors (12 spots each)</option>
+        <option value="entrance">Entrance-clustered</option>
+        <option value="frontier">Fill frontier</option>
+      </select>
+    </label>
+    <button id="reshuffle" title="Draw a new random sensor layout">↻ Reshuffle</button>
+    <button id="demoBtn" class="primary">▶ Demo</button>
+  </div>
+</header>
 
-async function boot(){
-  D = await fetch("data.json").then(r=>r.json());
-  DEC = await fetch("decisions.json").then(r=>r.ok?r.json():null).catch(()=>null);
-  const g = D.generated_for;
-  map = L.map("map").setView([g.dest.lat, g.dest.lon], 15);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(map);
-  L.circleMarker([g.dest.lat,g.dest.lon],{radius:9,color:"#0D3F5A",fillColor:"#0D3F5A",fillOpacity:1})
-    .addTo(map).bindTooltip(g.dest.name,{permanent:true,direction:"top",offset:[0,-8]});
-  $("scen").innerHTML = `Scenario: <b>${g.day==="sat"?"Saturday":"Weekday"}</b> · heading to
-    <b>${g.dest.name}</b><br>Persona: ${g.persona.label} <span class="badge">${D.source.includes("SEED")?"SEED DATA":"NCSU GIS DATA"}</span>`;
-  $("hour").value = g.hour;
-  $("hour").oninput = render;
-  render();
-}
-function flyFor(name){
-  if(!DEC) return null;
-  return DEC.decisions.find(d=>d.lot===name);
-}
-function render(){
-  const h = +$("hour").value;
-  $("hourLbl").textContent = (h%12||12)+(h<12?" AM":" PM")+(h===+D.generated_for.hour?" ●":"");
-  layers.forEach(l=>map.removeLayer(l)); layers=[];
-  const rows = D.lots.map(l=>({l,hh:l.hours[h],fly:flyFor(l.name)}))
-    .sort((a,b)=> (b.fly?b.fly.eat_mn9_hz:-1)-(a.fly?a.fly.eat_mn9_hz:-1) || b.hh.p_free-a.hh.p_free);
-  $("list").innerHTML = rows.map(({l,hh,fly},i)=>{
-    const s=l.senses;
-    return `<div class="lot ${sel===l.name?"sel":""}" onclick="focusLot('${l.name.replace(/'/g,"\\'")}')">
-      <h3>${l.name} <span class="v">${l.walk_min} min walk</span></h3>
-      <div class="meta">${l.spaces} spaces · ${l.usable} usable for you · ${l.covered?"covered · ":""}${l.hc} ♿ · ${l.ev} ⚡${l.price_hr?` · $${l.price_hr}/h`:""}</div>
-      <div class="est">Est. occupancy <b>${Math.round(hh.occ*100)}%</b>
-        <span style="color:var(--mut)">(${Math.round(hh.lo*100)}–${Math.round(hh.hi*100)}%)</span>
-        · open-spot chance <b>${Math.round(hh.p_free*100)}%</b> <span class="badge">ESTIMATE</span></div>
-      <div class="bars">
-        <span>sugar</span><div class="bar"><i style="width:${s.sugar_hz/2}%;background:#D8814B"></i></div><span>${s.sugar_hz} Hz</span>
-        <span>bitter</span><div class="bar"><i style="width:${s.bitter_hz/2}%;background:#7a4ea3"></i></div><span>${s.bitter_hz} Hz</span>
-        <span>looming</span><div class="bar"><i style="width:${s.looming_hz/1.5}%;background:#d93025"></i></div><span>${s.looming_hz} Hz</span>
+<main>
+  <section id="mapwrap">
+    <div id="map"></div>
+    <div class="legend">
+      <div class="lg-title">Each dot is one parking spot</div>
+      <div><i class="dot ring"></i> has a sensor (exact)</div>
+      <div><i class="dot" style="background:#4ade80"></i> inferred: likely free</div>
+      <div><i class="dot" style="background:#facc15;opacity:.55"></i> inferred: unsure (faded)</div>
+      <div><i class="dot" style="background:#ef4444"></i> inferred: likely taken</div>
+      <div class="lg-note">Occupancy is <b>simulated</b>. Lots and space counts are <b>official NCSU</b>.</div>
+    </div>
+    <div class="timebar">
+      <button id="play" title="Play the simulated day">▶</button>
+      <span id="clock">10:00 AM</span>
+      <input id="time" type="range" min="0" max="168" step="1" value="48" aria-label="Time of day">
+      <select id="day" aria-label="Simulated day"></select>
+      <label class="chk"><input id="truth" type="checkbox"> Reveal truth</label>
+    </div>
+    <div id="caption" hidden>
+      <div id="capText"></div>
+      <div class="capnav"><button id="capPrev">←</button><span id="capStep"></span><button id="capNext">→</button><button id="capExit">Exit demo</button></div>
+    </div>
+  </section>
+
+  <aside id="panel">
+    <nav class="tabs">
+      <button data-tab="sense" class="on">1 · Sense</button>
+      <button data-tab="spill">2 · Spillover</button>
+      <button data-tab="place">3 · Placement</button>
+      <button data-tab="fly">4 · Fly brain</button>
+    </nav>
+
+    <div class="tab on" id="tab-sense">
+      <div class="kpis">
+        <div class="kpi"><div class="k-lbl">Spots read right, whole map</div><div class="k-val" id="kMap">–</div><div class="k-sub" id="kMapSub"></div></div>
+        <div class="kpi"><div class="k-lbl">Unsensed spots, Brier error</div><div class="k-val" id="kBrier">–</div><div class="k-sub" id="kBrierSub"></div></div>
       </div>
-      ${fly?`<div class="fly ${vClass(fly.verdict)}">🪰 fly says <b>${fly.verdict}</b> · eat ${fly.eat_mn9_hz} Hz · flee ${fly.flee_gf_hz} Hz · back ${fly.back_mdn_hz} Hz${i===0&&fly.verdict.startsWith("EAT")?" — <b>the pick</b>":""}</div>`
-            :`<div class="fly">🪰 run <b>fly_decides_parking.ipynb</b> and drop decisions.json here</div>`}
-    </div>`}).join("");
-  rows.forEach(({l,hh})=>{
-    const style={color:col(hh.p_free),fillColor:col(hh.p_free),fillOpacity:.45,weight:2};
-    let ly;
-    if(l.ring) ly=L.geoJSON({type:"Feature",geometry:l.ring},{style}).addTo(map);
-    else ly=L.circleMarker([l.lat,l.lon],{...style,radius:Math.max(8,Math.sqrt(l.spaces)/2)}).addTo(map);
-    ly.bindTooltip(`${l.name}<br>~${Math.round(hh.occ*100)}% full (est.)`);
-    ly.on("click",()=>focusLot(l.name));
-    layers.push(ly);
-  });
-}
-function focusLot(name){
-  sel=name; const l=D.lots.find(x=>x.name===name);
-  map.setView([l.lat,l.lon],17); render();
-}
-boot();
-</script>
+      <div class="chartcard">
+        <div class="charthead">
+          <b>Sensor density vs accuracy</b>
+          <select id="metric">
+            <option value="map">Whole-map accuracy</option>
+            <option value="brier">Unsensed spots: Brier error</option>
+            <option value="free">Free-spot count error per lot</option>
+          </select>
+        </div>
+        <div id="chartDensity" class="chart"></div>
+        <div class="chartnote" id="densityNote"></div>
+      </div>
+      <table class="lots" id="lotTable"></table>
+      <p class="fine">Model: spots fill roughly in order of attractiveness, so a few sensed spots pin down one fill level per lot. Naive baseline: every unsensed spot gets the occupied share of the sensed ones.</p>
+    </div>
+
+    <div class="tab" id="tab-spill">
+      <p class="lead">Nearby lots share demand. Put sensors on <b>one whole lot</b> and its neighbors' estimates move too, with uncertainty that grows with distance.</p>
+      <div class="row"><label class="chk"><input id="spillOn" type="checkbox" checked> Spillover between lots</label>
+        <button id="clearWhole">Clear whole-lot sensors</button></div>
+      <div id="wholeList" class="wholelist"></div>
+      <div class="chartcard"><div class="charthead"><b>Uncertainty about each lot's fill</b><span class="mut">± fraction of the lot</span></div>
+        <div id="chartUnc" class="chart short"></div></div>
+      <div class="chartcard real">
+        <div class="charthead"><b>Checked on real data: Birmingham, UK</b><span class="badge real">REAL</span></div>
+        <div id="bhamHeadline" class="headline"></div>
+        <div id="chartBham" class="chart short"></div>
+        <div class="chartnote" id="bhamNote"></div>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-place">
+      <p class="lead">One Park Shark sensor (about $65) sees a group of 10 to 15 neighboring spots. With the same budget, <b>where</b> you put them changes how much of the lot you can read.</p>
+      <div class="seg" id="placeSeg">
+        <button data-s="entrance">Entrance</button><button data-s="spread">Spread</button><button data-s="frontier">Fill frontier</button><button data-s="scatter">Scattered</button>
+      </div>
+      <div id="placeHeadline" class="headline"></div>
+      <div class="chartcard"><div class="charthead"><b>Brier error on unsensed spots</b><span class="mut">lower is better</span></div>
+        <div id="chartPlace" class="chart"></div>
+        <div class="chartnote" id="placeNote"></div></div>
+      <p class="fine">Spots by the entrance are almost always taken, so sensors there keep saying "full" and tell you little about the rest. Sensors near the edge where the lot usually stops filling carry the most information.</p>
+    </div>
+
+    <div class="tab" id="tab-fly">
+      <div class="row">
+        <label>Driver <select id="persona"><option value="commuter">Commuter with a C permit</option><option value="visitor">Visitor, no permit</option></select></label>
+        <label class="chk lesion"><input id="lesion" type="checkbox"> Lesion Giant Fibre</label>
+      </div>
+      <div id="flyHeadline" class="headline"></div>
+      <div id="flyLots" class="flylots"></div>
+      <div class="gauges" id="gauges"></div>
+      <div class="chartcard"><div class="charthead"><b>The brain, firing</b><span class="mut" id="rasterLbl"></span></div>
+        <canvas id="raster" width="840" height="230"></canvas>
+        <div class="chartnote">Recorded spikes from a full-brain run with tastes like this lot's (three recorded cases; the nearest one plays).</div></div>
+      <div class="chartcard"><div class="charthead"><b>Does the fly park well?</b><span class="mut">minutes lost, lower is better</span></div>
+        <div id="chartDecision" class="chart short"></div>
+        <div class="chartnote" id="decisionNote"></div></div>
+      <details class="prov"><summary>Where the fly's answers come from</summary><div id="prov"></div></details>
+    </div>
+
+    <footer id="foot"></footer>
+  </aside>
+</main>
+
+<script src="vendor/leaflet.js"></script>
+<script src="model.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

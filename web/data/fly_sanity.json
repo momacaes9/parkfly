@@ -1,0 +1,80 @@
+{
+ "provenance": {
+  "dataset": "FlyWire FAFB v783 connectome, Shiu et al. 2024 signed connectivity",
+  "wiring_file": "Connectivity_783.parquet",
+  "n_neurons": 138639,
+  "n_connections": 15091983,
+  "model": "leaky integrate-and-fire, Shiu settings (-52 mV rest, -45 mV threshold, 20 ms membrane, 5 ms synapse, 2.2 ms refractory, 1.8 ms delay, 0.275 mV/synapse, 0.1 ms step)",
+  "ms_per_run": 200,
+  "group_sizes": {
+   "sugar": 32,
+   "bitter": 42,
+   "looming": 314,
+   "giant_fibre": 2,
+   "mdn": 4,
+   "dnp09": 2,
+   "mn9": 1
+  },
+  "script": "pipeline/fly_surface.py",
+  "run_date": "2026-11-14T11:44:46-05:00",
+  "seed": 0
+ },
+ "checks": [
+  {
+   "check": "no input",
+   "expected": "silence",
+   "mn9_hz": 0.0,
+   "giant_fibre_hz": 0.0,
+   "mdn_hz": 0.0,
+   "neurons_active": 0,
+   "pass": true
+  },
+  {
+   "check": "sugar 200 Hz",
+   "expected": "MN9 fires (eat)",
+   "mn9_hz": 100.0,
+   "giant_fibre_hz": 0.0,
+   "mdn_hz": 0.0,
+   "neurons_active": 419,
+   "pass": true
+  },
+  {
+   "check": "sugar 200 + bitter 200 Hz",
+   "expected": "MN9 drops a lot",
+   "mn9_hz": 5.0,
+   "giant_fibre_hz": 0.0,
+   "mdn_hz": 0.0,
+   "neurons_active": 296,
+   "pass": true
+  },
+  {
+   "check": "looming 150 Hz",
+   "expected": "Giant Fibre fires (escape)",
+   "mn9_hz": 0.0,
+   "giant_fibre_hz": 265.0,
+   "mdn_hz": 16.2,
+   "neurons_active": 1296,
+   "pass": true
+  },
+  {
+   "check": "looming 150 Hz, Giant Fibre inputs cut",
+   "expected": "no escape",
+   "mn9_hz": 0.0,
+   "giant_fibre_hz": 0.0,
+   "mdn_hz": 16.2,
+   "neurons_active": 1319,
+   "pass": true
+  },
+  {
+   "check": "sugar for 100 ms, then nothing",
+   "expected": "activity dies out",
+   "mn9_hz": 55.0,
+   "giant_fibre_hz": 0.0,
+   "mdn_hz": 0.0,
+   "neurons_active": 409,
+   "pass": true,
+   "spikes_in_last_30ms": 0
+  }
+ ],
+ "all_pass": true
+}
