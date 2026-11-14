@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Park Shark · NC State — Fly Brain Parking</title>
+<link rel="stylesheet" href="vendor/leaflet.css">
+<script src="vendor/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Changa+One&display=swap" rel="stylesheet">
+<style>
+:root{--rust:#D8814B;--navy:#0D3F5A;--bg:#f6f4f0;--card:#fff;--ink:#1d2730;--mut:#5c6b77}
+*{box-sizing:border-box;margin:0}
+body{font-family:Barlow,sans-serif;color:var(--ink);background:var(--bg);height:100vh;display:flex;overflow:hidden}
+#side{width:390px;min-width:330px;display:flex;flex-direction:column;background:var(--card);box-shadow:2px 0 12px rgba(13,63,90,.12);z-index:1000}
+#map{flex:1}
+header{background:var(--navy);color:#fff;padding:14px 16px}
+header h1{font-family:'Changa One',cursive;font-weight:400;font-size:22px;letter-spacing:.5px}
+header h1 span{color:var(--rust)}
+header p{font-size:12.5px;opacity:.85;margin-top:3px}
+#scen{padding:10px 16px;border-bottom:1px solid #e5e0d8;font-size:13px}
+#scen b{color:var(--navy)}
+#hourRow{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #e5e0d8}
+#hourRow input{flex:1;accent-color:var(--rust)}
+#hourLbl{font-weight:700;color:var(--navy);width:88px;font-size:14px}
+#list{flex:1;overflow-y:auto;padding:10px 12px}
+.lot{background:#fff;border:1px solid #e5e0d8;border-radius:10px;padding:10px 12px;margin-bottom:9px;cursor:pointer;transition:border .15s}
+.lot:hover,.lot.sel{border-color:var(--rust)}
+.lot h3{font-size:14.5px;color:var(--navy);display:flex;justify-content:space-between;gap:6px}
+.lot h3 .v{font-size:12px;white-space:nowrap}
+.meta{font-size:12px;color:var(--mut);margin:3px 0 6px}
+.bars{display:grid;grid-template-columns:52px 1fr 34px;gap:3px 7px;font-size:11px;align-items:center}
+.bar{height:7px;border-radius:4px;background:#eee;overflow:hidden}
+.bar i{display:block;height:100%}
+.est{font-size:12px;margin-top:6px;color:var(--ink)}
+.est b{color:var(--navy)}
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.4px;padding:1px 7px;border-radius:9px;background:#fdf0e6;color:var(--rust);border:1px solid var(--rust)}
+footer{padding:9px 14px;font-size:10.5px;color:var(--mut);border-top:1px solid #e5e0d8;line-height:1.45}
+.fly{font-size:12px;margin-top:5px;padding:5px 8px;border-radius:7px;background:#eef4f8;color:var(--navy)}
+.fly.eat{background:#e8f3e8;color:#1d6b2e}.fly.flee{background:#fce8e6;color:#b3261e}.fly.back{background:#fef7e0;color:#8a6d00}
+.legend{position:absolute;bottom:18px;right:12px;z-index:900;background:#fff;border-radius:9px;padding:9px 12px;font:12px Barlow;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:6px;margin-right:5px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div id="side">
+  <header>
+    <h1>PARK <span>SHARK</span> · NC STATE</h1>
+    <p>A hungry fly (139k real neurons) hunting the sweetest parking spot</p>
+  </header>
+  <div id="scen"></div>
+  <div id="hourRow"><span id="hourLbl"></span><input id="hour" type="range" min="0" max="23" step="1"></div>
+  <div id="list"></div>
+  <footer><b>Honest numbers:</b> every occupancy value is a model <b>estimate</b> from assumed hour
+  templates — no sensor has ever reported from these lots. Bands show that uncertainty. Lot names,
+  capacities and permit-type space counts come from NCSU Transportation GIS when loaded (seed data is
+  flagged). Permit rules simplified — posted signs control. Fly verdicts come from the FlyWire/Shiu
+  whole-brain simulation run in Colab.</footer>
+</div>
+<div id="map"></div>
+<div class="legend"><div><i style="background:#2e8b57"></i>likely open spot</div>
+<div><i style="background:#f29900"></i>uncertain</div><div><i style="background:#d93025"></i>likely full / filling</div>
+<div style="margin-top:4px"><i style="background:#0D3F5A"></i>destination</div></div>
+<script>
+const $=id=>document.getElementById(id);
+let D=null, DEC=null, map, layers=[], sel=null;
+const col=p=> p>.6?"#2e8b57":p>.3?"#f29900":"#d93025";
+const vClass=v=> v&&v.startsWith("EAT")?"eat":v&&v.startsWith("FLEE")?"flee":"back";
+
+async function boot(){
+  D = await fetch("data.json").then(r=>r.json());
+  DEC = await fetch("decisions.json").then(r=>r.ok?r.json():null).catch(()=>null);
+  const g = D.generated_for;
+  map = L.map("map").setView([g.dest.lat, g.dest.lon], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(map);
+  L.circleMarker([g.dest.lat,g.dest.lon],{radius:9,color:"#0D3F5A",fillColor:"#0D3F5A",fillOpacity:1})
+    .addTo(map).bindTooltip(g.dest.name,{permanent:true,direction:"top",offset:[0,-8]});
+  $("scen").innerHTML = `Scenario: <b>${g.day==="sat"?"Saturday":"Weekday"}</b> · heading to
+    <b>${g.dest.name}</b><br>Persona: ${g.persona.label} <span class="badge">${D.source.includes("SEED")?"SEED DATA":"NCSU GIS DATA"}</span>`;
+  $("hour").value = g.hour;
+  $("hour").oninput = render;
+  render();
+}
+function flyFor(name){
+  if(!DEC) return null;
+  return DEC.decisions.find(d=>d.lot===name);
+}
+function render(){
+  const h = +$("hour").value;
+  $("hourLbl").textContent = (h%12||12)+(h<12?" AM":" PM")+(h===+D.generated_for.hour?" ●":"");
+  layers.forEach(l=>map.removeLayer(l)); layers=[];
+  const rows = D.lots.map(l=>({l,hh:l.hours[h],fly:flyFor(l.name)}))
+    .sort((a,b)=> (b.fly?b.fly.eat_mn9_hz:-1)-(a.fly?a.fly.eat_mn9_hz:-1) || b.hh.p_free-a.hh.p_free);
+  $("list").innerHTML = rows.map(({l,hh,fly},i)=>{
+    const s=l.senses;
+    return `<div class="lot ${sel===l.name?"sel":""}" onclick="focusLot('${l.name.replace(/'/g,"\\'")}')">
+      <h3>${l.name} <span class="v">${l.walk_min} min walk</span></h3>
+      <div class="meta">${l.spaces} spaces · ${l.usable} usable for you · ${l.covered?"covered · ":""}${l.hc} ♿ · ${l.ev} ⚡${l.price_hr?` · $${l.price_hr}/h`:""}</div>
+      <div class="est">Est. occupancy <b>${Math.round(hh.occ*100)}%</b>
+        <span style="color:var(--mut)">(${Math.round(hh.lo*100)}–${Math.round(hh.hi*100)}%)</span>
+        · open-spot chance <b>${Math.round(hh.p_free*100)}%</b> <span class="badge">ESTIMATE</span></div>
+      <div class="bars">
+        <span>sugar</span><div class="bar"><i style="width:${s.sugar_hz/2}%;background:#D8814B"></i></div><span>${s.sugar_hz} Hz</span>
+        <span>bitter</span><div class="bar"><i style="width:${s.bitter_hz/2}%;background:#7a4ea3"></i></div><span>${s.bitter_hz} Hz</span>
+        <span>looming</span><div class="bar"><i style="width:${s.looming_hz/1.5}%;background:#d93025"></i></div><span>${s.looming_hz} Hz</span>
+      </div>
+      ${fly?`<div class="fly ${vClass(fly.verdict)}">🪰 fly says <b>${fly.verdict}</b> · eat ${fly.eat_mn9_hz} Hz · flee ${fly.flee_gf_hz} Hz · back ${fly.back_mdn_hz} Hz${i===0&&fly.verdict.startsWith("EAT")?" — <b>the pick</b>":""}</div>`
+            :`<div class="fly">🪰 run <b>fly_decides_parking.ipynb</b> and drop decisions.json here</div>`}
+    </div>`}).join("");
+  rows.forEach(({l,hh})=>{
+    const style={color:col(hh.p_free),fillColor:col(hh.p_free),fillOpacity:.45,weight:2};
+    let ly;
+    if(l.ring) ly=L.geoJSON({type:"Feature",geometry:l.ring},{style}).addTo(map);
+    else ly=L.circleMarker([l.lat,l.lon],{...style,radius:Math.max(8,Math.sqrt(l.spaces)/2)}).addTo(map);
+    ly.bindTooltip(`${l.name}<br>~${Math.round(hh.occ*100)}% full (est.)`);
+    ly.on("click",()=>focusLot(l.name));
+    layers.push(ly);
+  });
+}
+function focusLot(name){
+  sel=name; const l=D.lots.find(x=>x.name===name);
+  map.setView([l.lat,l.lon],17); render();
+}
+boot();
+</script>
+</body>
+</html>

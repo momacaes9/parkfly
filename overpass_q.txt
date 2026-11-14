@@ -1,0 +1,7 @@
+[out:json][timeout:60];
+(
+  way["amenity"="parking"](35.755,-78.700,35.800,-78.650);
+  relation["amenity"="parking"](35.755,-78.700,35.800,-78.650);
+  way["building"="parking"](35.755,-78.700,35.800,-78.650);
+);
+out body geom tags;
