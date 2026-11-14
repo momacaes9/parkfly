@@ -4,15 +4,15 @@
   "timings": [
     {
       "value": 0,
-      "ms": 17.200000000186265
+      "ms": 3.5
     },
     {
       "value": 25,
-      "ms": 11
+      "ms": 2.099999999627471
     },
     {
       "value": 100,
-      "ms": 10.399999999441206
+      "ms": 2.599999999627471
     }
   ],
   "official": "Official API verified: 214 polygons. Focus-lot capacities match the cached snapshot. No live occupancy is supplied.",

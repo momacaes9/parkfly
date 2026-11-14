@@ -99,3 +99,9 @@
 - Published /v6/ at the canonical project; production V6 browser test passed search/reset, weekday/Saturday, time controls, lot detail and three fly animations with no page errors.
 - README ends with an explanatory results table, exact V6 embedded counts (144 lots, 17,527 capacity spaces, 75 modeled layouts, 9 destinations, 14 recorded decisions, 3 recorded journeys), library roles and live-data limitations. Proposed repository description is saved in GITHUB_DESCRIPTION.md; metadata PATCH also returned 403.
 - To avoid recursively bundling old binary recovery packages, the refreshed collaborator branch consolidates the current source tree onto origin/V6 and omits the bundle itself and its metadata. Local full development history remains on main.
+
+## NC State campus basemap (Claude Code session, Nov 14 afternoon)
+- GitHub was already in sync at session start: local main == origin/main == 259d71a, clean tree. This machine's `gh` token has `repo` scope, so the earlier 403 push blocker no longer applies here.
+- Added `web/ncsu-basemap.js`: official NC State campus map (NC State University GIS dynamic MapServer export) as the default base layer in the main app; fallback chain is now NC State -> OSM -> Carto -> offline polygons. V6 uses the same layer with OSM underneath as fallback.
+- Verified locally in headless Chrome at 1366x768: label reads "basemap: NC State campus map (official)", campus streets/buildings/names render under the lots, zoom re-requests the image, no page or console errors. Full `tests/browser.test.cjs` passes (all controls, six demo beats, lesion, offline fallback); Node parity tests pass. Python tests not re-run (no Python code changed).
+- Not done from the pasted unified prompt: T5 route choice (road graph, traffic layer, annealing, per-hop fly decisions) is not built. Next if wanted.

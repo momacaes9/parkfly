@@ -27,7 +27,7 @@ Brain-policy tests cover four held-out simulated days. Its one-case improvement 
 
 **Use the main demo for judging:** https://parkfly-one.vercel.app/ . It contains the sensor experiment, accuracy curves, neural readouts and lesion toggle. The **V6 campus map** is an additional view with 144 lots, 17,527 official capacity spaces and 75 estimated layouts; its imported neural export covers the default weekday 10am scenario. Other settings use labeled heuristic scores.
 
-NC State supplies official geometry and capacity through `/api/ncsu`, **not live occupancy**. Optional browser GPS updates estimated travel inputs after permission. Parking occupancy, stall layouts and travel times are simulated or estimated.
+NC State supplies official geometry and capacity through `/api/ncsu`, **not live occupancy**. The default basemap is the official NC State campus map (NC State University GIS), with OpenStreetMap, Carto and an offline polygon view as automatic fallbacks. Optional browser GPS updates estimated travel inputs after permission. Parking occupancy, stall layouts and travel times are simulated or estimated.
 
 **Libraries:** NumPy, SciPy sparse, pandas and PyArrow for the connectome; Leaflet for maps. FAFBseg/Navis/Plotly skeleton visualization is optional. Flybody is not used.
 

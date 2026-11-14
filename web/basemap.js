@@ -12,7 +12,9 @@
     const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 21, maxNativeZoom: 19 });
     const plain = L.layerGroup();
-    const layers = { OpenStreetMap: osm, 'Carto light': carto, 'Offline NCSU polygons': plain };
+    const NCSU = 'NC State campus map (official)';
+    const ncsu = L.ncsuCampusLayer ? L.ncsuCampusLayer() : null;
+    const layers = { ...(ncsu ? { [NCSU]: ncsu } : {}), OpenStreetMap: osm, 'Carto light': carto, 'Offline NCSU polygons': plain };
     const ctl = L.control.layers(layers, null, { position: 'topright' }).addTo(map);
     let active = null, generation = 0, googleLayer = null, changing = false;
     function use(layer, name) {
@@ -21,23 +23,23 @@
       if (googleLayer && map.hasLayer(googleLayer)) map.removeLayer(googleLayer);
       active = layer; layer.addTo(map); setLabel(name); changing = false;
     }
+    const choices = [...(ncsu ? [[ncsu, NCSU]] : []), [osm, 'OpenStreetMap'], [carto, 'Carto light'], [plain, 'Offline NCSU polygons']];
     function activate(index) {
-      const choices = [[osm, 'OpenStreetMap'], [carto, 'Carto light'], [plain, 'Offline NCSU polygons']];
       const [layer, name] = choices[index];
       use(layer, name);
-      if (index === 2) return;
+      if (layer === plain) return;
       const gen = generation;
       let loaded = false, errors = 0;
       layer.once('tileload', () => { loaded = true; });
       const fallback = () => { if (active === layer && generation === gen && !loaded) activate(index + 1); };
-      layer.on('tileerror', () => { if (++errors >= 4) fallback(); });
-      setTimeout(fallback, 6000);
+      layer.on('tileerror', () => { if (++errors >= (layer === ncsu ? 1 : 4)) fallback(); });
+      setTimeout(fallback, 5000);
     }
     map.on('baselayerchange', e => {
       if (changing) return;
       generation++; active = e.layer; setLabel(e.name);
-      if (e.layer === osm) activate(0);
-      else if (e.layer === carto) activate(1);
+      const index = choices.findIndex(c => c[0] === e.layer);
+      if (index >= 0) activate(index);
     });
     activate(0);
     if (!cfg.GOOGLE_MAPS_KEY) return;
