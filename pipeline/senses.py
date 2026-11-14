@@ -36,9 +36,12 @@ def tastes(n, p_occ, post, S, mask, occ, walk_min, price_hr, permit_risk, rise15
     p_full = float(post[free_g < 1.0].sum())
     sugar = (1 - np.exp(-e_free / FREE_SCALE)) * np.exp(-walk_min / WALK_SCALE_MIN) * (1 - permit_risk)
     bitter = min(1.0, (sd_free / n) / UNC_FULL + permit_risk + price_hr / PRICE_FULL)
-    loom = min(1.0, 0.5 * min(1.0, max(rise15, 0.0) / RISE_FULL) + p_full)
+    loom = min(1.0, min(1.0, max(rise15, 0.0) / RISE_FULL) + p_full)
     return {"sugar": float(sugar), "bitter": float(bitter), "loom": float(loom),
-            "e_free": e_free, "sd_free": sd_free, "p_full": p_full}
+            "e_free": e_free, "sd_free": sd_free, "p_full": p_full,
+            "availability": float(post @ (1 - np.exp(-free_g / FREE_SCALE))),
+            "near_full": float(post[np.linspace(0, 1, len(post)) >= .95].sum()),
+            "uncertainty": sd_free / n / UNC_FULL}
 
 
 def to_hz(t):
@@ -86,3 +89,12 @@ def fly_pick(reads, hz):
         return max(commit, key=key), v
     rest = [i for i in range(len(reads)) if v[i] != "DIVERT"] or list(range(len(reads)))
     return max(rest, key=lambda i: (key(i)[0] - reads[i]["giant_fibre"], key(i)[1])), v
+
+
+def calibrated_hz(t, walk_min, price_hr, permit_risk, rise15, weights):
+    """Training-fitted parking encoder; the real brain wiring/readout is unchanged."""
+    sugar = t["availability"] * np.exp(-walk_min / weights["walk_scale"]) * (1 - permit_risk)
+    bitter = weights["uncertainty_gain"] * t["uncertainty"] + permit_risk + price_hr / PRICE_FULL
+    looming = weights["loom_gain"] * max(rise15, 0) / RISE_FULL + weights["near_full_gain"] * t["near_full"]
+    return (SUGAR_MAX_HZ * float(np.clip(sugar, 0, 1)), BITTER_MAX_HZ * float(np.clip(bitter, 0, 1)),
+            LOOM_MAX_HZ * float(np.clip(looming, 0, 1)))

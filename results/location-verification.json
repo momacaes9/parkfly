@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "target": "https://parkfly-one.vercel.app/?connect=1",
+  "source": "Mocked browser device positions, not the user’s actual GPS",
+  "granted": true,
+  "positionUpdates": true,
+  "deniedGracefully": true,
+  "stopClears": true,
+  "coordinatesSentToServer": false,
+  "pageErrors": []
+}

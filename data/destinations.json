@@ -1,0 +1,14 @@
+{
+  "hunt": {
+    "name": "James B. Hunt Jr. Library",
+    "lat": 35.7693508,
+    "lon": -78.6763829,
+    "basis": "OpenStreetMap way/177166351 via Nominatim, checked 2026-11-14"
+  },
+  "riddick": {
+    "name": "Riddick Hall",
+    "lat": 35.7850478,
+    "lon": -78.6683594,
+    "basis": "OpenStreetMap way/47917781 via Nominatim, checked 2026-11-14"
+  }
+}

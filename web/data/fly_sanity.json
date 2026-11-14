@@ -16,7 +16,7 @@
    "mn9": 1
   },
   "script": "pipeline/fly_surface.py",
-  "run_date": "2026-11-14T11:44:46-05:00",
+  "run_date": "2026-11-14T13:04:41-05:00",
   "seed": 0
  },
  "checks": [

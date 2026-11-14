@@ -8,6 +8,7 @@ const PF = require("../web/model.js");
 const J = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url)));
 const lots = J("../web/data/lots.json").lots, truth = J("../web/data/truth.json");
 const surfDoc = J("../web/data/fly_surface.json"), cases = J("./parity_case.json").cases;
+const calibration = J("../web/data/fly_calibration.json").encoder;
 const fit = truth.fitted, nL = lots.length, N = lots.map((l) => l.spaces);
 const close = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg}: ${a} vs ${b}`);
 
@@ -31,6 +32,11 @@ test("JS model matches Python on fixed cases", () => {
       ts.push(t); hz.push(PF.toHz(t)); reads.push(surf.read(...hz[i]));
       ["mn9", "giant_fibre", "mdn"].forEach((k, j) => close(reads[i][k], c.reads[i][j], 2e-3, `read ${k}`));
     }
+    const calibratedHz = ts.map((t,i)=>PF.calibratedHz(t,lots[i].walk_min+2,lots[i].price_hr,0,.02,calibration));
+    calibratedHz.forEach((h,i)=>h.forEach((v,j)=>close(v,c.calibrated_hz[i][j],2e-5,"calibrated sensory Hz")));
+    const calibratedReads = calibratedHz.map(h=>surf.read(...h));
+    calibratedReads.forEach((r,i)=>["mn9","giant_fibre","mdn"].forEach(k=>close(r[k],c.calibrated_reads[i][k],2e-3,"calibrated neuron read")));
+    assert.equal(PF.flyPick(calibratedReads,calibratedHz).pick,c.calibrated_pick);
     const fp = PF.flyPick(reads, hz);
     assert.equal(fp.pick, c.pick); assert.deepEqual(fp.verdicts, c.verdicts);
   }

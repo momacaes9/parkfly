@@ -29,8 +29,8 @@ from flybrain import Brain, WIRING_FILE  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "web", "data")
-GRID = {"sugar": [0, 25, 50, 75, 100, 150, 200], "bitter": [0, 25, 50, 75, 100, 150, 200],
-        "loom": [0, 10, 20, 30, 40, 50, 100, 150]}
+GRID = {"sugar": [0, 50, 100, 150, 200], "bitter": [0, 50, 100, 200],
+        "loom": [0, 50, 100, 150]}
 OUTPUTS = ["mn9", "giant_fibre", "mdn", "dnp09"]
 MS = 200
 
@@ -50,7 +50,7 @@ def provenance(b, **extra):
             "model": "leaky integrate-and-fire, Shiu settings (-52 mV rest, -45 mV threshold, 20 ms membrane, "
                      "5 ms synapse, 2.2 ms refractory, 1.8 ms delay, 0.275 mV/synapse, 0.1 ms step)",
             "ms_per_run": MS, "group_sizes": {k: int(len(v)) for k, v in b.groups.items()},
-            "script": "pipeline/fly_surface.py",
+            "script": "pipeline/fly_surface.py", "notebook": "colab/fly_surface.ipynb",
             "run_date": datetime.datetime.now().astimezone().isoformat(timespec="seconds"), **extra}
 
 
@@ -113,7 +113,17 @@ def surface(workers, seeds, coarse=False):
     # with the Giant Fibre's inputs cut and no looming, nothing differs from intact only through GF
     # itself; we still run every point so the lesioned table is measured, not assumed.
     print(f"{len(jobs)} runs on {workers} workers", flush=True)
-    acc, t0, done = {}, time.time(), 0
+    cache_path = os.path.join(OUT, "fly_runs.partial.json")
+    acc = {}
+    if os.path.exists(cache_path):
+        saved = json.load(open(cache_path))
+        for row in saved:
+            job = tuple(row["job"])
+            if job in jobs:
+                acc[job] = row["rates"]
+    t0, done = time.time(), len(acc)
+    pending = [job for job in jobs if job not in acc]
+    print(f"Resuming {done} cached runs; {len(pending)} remain", flush=True)
     path = os.path.join(OUT, "fly_surface.json")
 
     def dump(final):
@@ -140,12 +150,17 @@ def surface(workers, seeds, coarse=False):
             os.remove(path.replace(".json", ".partial.json"))
 
     with Pool(workers, initializer=brain) as pool:
-        for job, res in pool.imap_unordered(_run, jobs):
+        for job, res in pool.imap_unordered(_run, pending):
             acc[job] = res; done += 1
-            if done % 200 == 0 or done == len(jobs):
+            if done % 10 == 0 or done == len(jobs):
+                temp = cache_path + ".tmp"
+                with open(temp, "w") as f:
+                    json.dump([{"job": list(j), "rates": r} for j, r in acc.items()], f)
+                os.replace(temp, cache_path)
                 el = time.time() - t0
                 print(f"  {done}/{len(jobs)}  {el:.0f}s  eta {el / done * (len(jobs) - done):.0f}s", flush=True)
                 dump(done == len(jobs))
+    if done == len(jobs): dump(True)
     print("wrote", path)
 
 
@@ -195,6 +210,8 @@ if __name__ == "__main__":
         c = b.simulate([(b.groups["sugar"], 200)])
         print(f"N={b.N} nnz={b.n_connections} one run {time.time() - t:.1f}s mn9={b.rate(c, 'mn9'):.1f}Hz",
               {k: len(v) for k, v in b.groups.items()})
-    if a.what in ("sanity", "all"): sanity()
+    if a.what in ("sanity", "all"):
+        if not sanity()["all_pass"]:
+            sys.exit("Sanity failed; response surface blocked")
     if a.what in ("surface", "all"): surface(a.workers, a.seeds, a.coarse)
     if a.what in ("raster", "all"): raster()

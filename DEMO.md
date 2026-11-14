@@ -1,0 +1,12 @@
+# 🪰 ParkFly simulation demo · four minutes
+
+Open https://parkfly-one.vercel.app, click Demo, and use → for each of six beats. Escape exits. All occupancy is labeled simulated; the connectome and measured brain responses are real.
+
+1. **0:00–0:20 · The experiment.** A fly acts on sparse sensory input. This lab hides parking occupancy and asks what an inference model and a real brain circuit can recover. Official NC State geometry gives a concrete simulation environment.
+2. **0:20–1:05 · Partial observations.** Move coverage 0 → 25 → 100 → 25. Rings are observations. Other dots are posterior estimates. The main accuracy score excludes observed spots. At 100%, unsensed metrics are n/a. Quote the held-out accuracy/Brier values shown in the chart, separate from the current snapshot.
+3. **1:05–1:35 · Shared state.** Sense one entire lot. Nearby uncertainty changes. The Birmingham card provides a separate real-data validation of across-lot inference: 28 retained car parks, 51/22 chronological train/test days, 32.5% lower hidden-lot MAE.
+4. **1:35–2:05 · Experimental design.** Compare entrance and spread clusters with the same observation budget. Discuss the measured prediction error instead of a hardware deployment claim.
+5. **2:05–3:05 · The real circuit.** The selected held-out scene uses the original encoder: E.B. III has 5 free simulated spots, then 0 fifteen minutes later. Intact Giant Fibre drives DIVERT. Cut its incoming synapses: GF is zero and the readout becomes COMMIT. Explain that rasters are recorded and browser readouts interpolate a real 480-run spiking table.
+6. **3:05–4:00 · Training and evidence.** Switch to the calibrated encoder. Fourteen training days select four input-encoding parameters; four different days evaluate them. At 25% coverage: calibrated 151/156 successful choices (96.79%, 1.583 min) vs original 150/156 (96.15%, 1.763 min). The paired 95% day-bootstrap gain interval is 0 to 1.92 percentage points. This small simulation result needs further validation. Synapses were not trained.
+
+The lab's Fly brain panel exposes original/calibrated encoders, measured decision accuracy, a simulated decision-cost curve, neuron firing rates, lesion control, real grouped connectivity, and simulator provenance. Download the Colab notebook under Simulator settings & libraries to reproduce full-brain runs. The optional skeleton viewer needs a private FlyWire token; the numerical simulation does not.

@@ -191,12 +191,22 @@
     const sugar = (1 - Math.exp(-eFree / SENSE.FREE_SCALE)) * Math.exp(-walkMin / SENSE.WALK_SCALE_MIN) * (1 - permitRisk);
     const unc = (sdFree / n) / SENSE.UNC_FULL;
     const bitter = Math.min(1, unc + permitRisk + priceHr / SENSE.PRICE_FULL);
-    const loom = Math.min(1, 0.5 * Math.min(1, Math.max(rise15, 0) / SENSE.RISE_FULL) + pFull);
+    const loom = Math.min(1, Math.min(1, Math.max(rise15, 0) / SENSE.RISE_FULL) + pFull);
+    let availability = 0, nearFull = 0;
+    for (let g = 0; g < G; g++) { availability += post[g] * (1 - Math.exp(-freeG[g] / SENSE.FREE_SCALE)); if (FGRID[g] >= .95) nearFull += post[g]; }
     return { sugar, bitter, loom, e_free: eFree, sd_free: sdFree, p_full: pFull,
+             availability, near_full: nearFull, uncertainty: unc,
              bitter_parts: { uncertainty: Math.min(1, unc), permit: permitRisk, price: priceHr / SENSE.PRICE_FULL } };
   }
   const clamp01 = (x) => Math.min(1, Math.max(0, x));
   const toHz = (t) => [SENSE.SUGAR_MAX_HZ * clamp01(t.sugar), SENSE.BITTER_MAX_HZ * clamp01(t.bitter), SENSE.LOOM_MAX_HZ * clamp01(t.loom)];
+
+  function calibratedHz(t, walkMin, priceHr, permitRisk, rise15, weights) {
+    const sugar = t.availability * Math.exp(-walkMin / weights.walk_scale) * (1 - permitRisk);
+    const bitter = weights.uncertainty_gain * t.uncertainty + permitRisk + priceHr / SENSE.PRICE_FULL;
+    const looming = weights.loom_gain * Math.max(rise15,0) / SENSE.RISE_FULL + weights.near_full_gain * t.near_full;
+    return [SENSE.SUGAR_MAX_HZ*clamp01(sugar),SENSE.BITTER_MAX_HZ*clamp01(bitter),SENSE.LOOM_MAX_HZ*clamp01(looming)];
+  }
 
   function Surface(doc, mode) {
     this.ax = [doc.grid.sugar, doc.grid.bitter, doc.grid.loom];
@@ -244,5 +254,5 @@
   }
 
   return { G, FGRID, SD_FLOOR, CLUSTER, SENSE, occMatrix, loglik, infer, naive, rng32, quantile, place, tastes, toHz,
-           Surface, verdict, flyPick, unpack };
+           Surface, verdict, flyPick, unpack, calibratedHz };
 });

@@ -1,0 +1,37 @@
+const path=require('path'),ROOT=path.resolve(__dirname,'..');
+const {chromium}=require('playwright'),assert=require('assert/strict'),fs=require('fs');
+(async()=>{
+const b=await chromium.launch({executablePath:process.env.BROWSER_PATH || '/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+const context=await b.newContext({viewport:{width:1366,height:768},ignoreHTTPSErrors:true,geolocation:{latitude:35.772,longitude:-78.677,accuracy:20},permissions:['geolocation']});
+const p=await context.newPage(),errors=[],requests=[];
+await p.addInitScript(()=>{const geo={watchPosition(ok,fail){window.__testGeoSuccess=ok;setTimeout(()=>ok({coords:{latitude:35.772,longitude:-78.677,accuracy:20}}),20);return 1;},clearWatch(){window.__testGeoSuccess=null;}};Object.defineProperty(navigator,'geolocation',{value:geo});});
+p.on('pageerror',e=>errors.push(e.message));p.on('request',r=>requests.push(r.url()));
+await p.goto(process.env.TEST_URL||'http://127.0.0.1:8765');await p.waitForSelector('#lotTable tr[data-i]',{state:'attached'});
+await p.click('[data-tab="fly"]');
+const before=await p.locator('#gauges').innerText();
+await p.click('#locate');await p.waitForFunction(()=>document.querySelector('#locationStatus').textContent.startsWith('LIVE'));
+assert.match(await p.locator('#locationStatus').innerText(),/±20 m/);
+assert.match(await p.locator('#flyHeadline').innerText(),/LIVE device location/);
+assert.equal(await p.locator('#tab-fly').isVisible(),true);
+assert.match(await p.locator('#connectionStatus').innerText(),/LIVE GPS/);
+await p.waitForFunction(()=>document.querySelector('#connectionStatus').textContent.includes('polygons verified'));
+assert.match(await p.locator('#connectionStatus').innerText(),/138,639 neurons/);
+await p.getByText('Compare lot responses',{exact:true}).click();
+assert.match(await p.locator('#flyLots').innerText(),/estimated from GPS/);
+const first=await p.locator('#gauges').innerText();assert.notEqual(before,first);
+await p.evaluate(()=>window.__testGeoSuccess({coords:{latitude:35.782,longitude:-78.669,accuracy:10}}));
+await p.waitForFunction(()=>document.querySelector('#locationStatus').textContent.includes('±10 m'),null,{timeout:5000}).catch(async e=>{console.log('LOCATION DEBUG',await p.locator('#locationStatus').innerText());throw e;});
+const second=await p.locator('#gauges').innerText();assert.notEqual(first,second);
+await p.click('#campus');await p.click('#connectFly');
+assert.match(await p.locator('#locationStatus').innerText(),/stopped and cleared/);
+assert.doesNotMatch(await p.locator('#flyHeadline').innerText(),/LIVE device location/);
+assert.equal(requests.filter(u=>u.includes('35.772')||u.includes('35.782')).length,0);
+// A denied browser permission leaves the demo usable and explains retry.
+const denied=await b.newContext({viewport:{width:390,height:844}}),q=await denied.newPage();
+await q.addInitScript(()=>{Object.defineProperty(navigator,'geolocation',{value:{watchPosition(ok,fail){setTimeout(()=>fail({code:1}),10);return 3;},clearWatch(){}}})});
+await q.goto('http://127.0.0.1:8765');await q.waitForSelector('#lotTable tr[data-i]');await q.click('#locate');await q.waitForFunction(()=>document.querySelector('#locationStatus').textContent.includes('denied'));
+assert.equal(await q.evaluate(()=>document.body.scrollWidth),390);
+assert.deepEqual(errors,[]);
+const report={passed:true,target:process.env.TEST_URL || 'http://127.0.0.1:8765',source:'Mocked browser device positions, not the user’s actual GPS',granted:true,positionUpdates:true,deniedGracefully:true,stopClears:true,coordinatesSentToServer:false,pageErrors:errors};
+fs.writeFileSync(path.join(ROOT,'results/location-verification.json'),JSON.stringify(report,null,2));console.log(report);await b.close();
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ParkFly · Park Shark × Fly Brain · NC State</title>
+<title>🪰 ParkFly · NC State Simulation Lab</title>
 <meta name="description" content="Sense 25% of the parking spots, infer the other 75%, and let a real fruit-fly connectome decide where to park.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦈</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪰</text></svg>">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Changa+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header id="top">
   <div class="brand">
-    <div class="logo">PARK <span>SHARK</span> <em>×</em> FLY BRAIN</div>
-    <div class="sub">NC State Hack Day · sense a few spots, infer the rest, let a real fly brain decide</div>
+    <div class="logo"><span class="flymark" aria-hidden="true">🪰</span> PARK<span>FLY</span></div>
+    <div class="sub">NC State simulation lab · real fly connectome · <a href="v6/">Ishan V6 ↗</a></div>
+    <label class="destinationLabel">Destination <select id="destination" aria-label="Destination"><option value="hunt">Hunt Library</option><option value="riddick">Riddick Hall · Hack Day</option></select></label>
   </div>
   <div class="sensorbox">
     <div class="sensorhead">
@@ -24,7 +24,7 @@
       <span id="pctNote" class="note"></span>
     </div>
     <div class="sliderwrap">
-      <div class="zone" title="Park Shark's target coverage: 20 to 30%"></div>
+      <div class="zone" title="Target sensor coverage: 20 to 30%"></div>
       <input id="pct" type="range" min="0" max="100" step="1" value="25" aria-label="Percent of spots with sensors">
     </div>
   </div>
@@ -45,14 +45,20 @@
 <main>
   <section id="mapwrap">
     <div id="map"></div>
-    <div class="legend">
-      <div class="lg-title">Each dot is one parking spot</div>
-      <div><i class="dot ring"></i> has a sensor (exact)</div>
-      <div><i class="dot" style="background:#4ade80"></i> inferred: likely free</div>
-      <div><i class="dot" style="background:#facc15;opacity:.55"></i> inferred: unsure (faded)</div>
-      <div><i class="dot" style="background:#ef4444"></i> inferred: likely taken</div>
-      <div class="lg-note">Occupancy is <b>simulated</b>. Lots and space counts are <b>official NCSU</b>.</div>
+    <div class="maptools">
+      <button id="campus" title="Fit the NC State focus lots">NC State</button>
+      <button id="locate" title="Use device GPS locally; basemap providers receive map-area requests">◎ Use my location</button>
+      <span id="mapLocationHint">GPS off</span>
     </div>
+    <div class="mapSource">SIMULATED OCCUPANCY <span>· official NCSU lots</span></div>
+    <details class="legend">
+      <summary>Map key</summary>
+      <div><i class="dot ring"></i> sensed spot · exact</div>
+      <div><i class="dot" style="background:#4ade80"></i> likely free</div>
+      <div><i class="dot" style="background:#facc15;opacity:.55"></i> uncertain prediction</div>
+      <div><i class="dot" style="background:#ef4444"></i> likely occupied</div>
+      <div class="lg-note">Spot positions are estimated. Select a lot for its neural readout.</div>
+    </details>
     <div class="timebar">
       <button id="play" title="Play the simulated day">▶</button>
       <span id="clock">10:00 AM</span>
@@ -68,21 +74,22 @@
 
   <aside id="panel">
     <nav class="tabs">
-      <button data-tab="sense" class="on">1 · Sense</button>
-      <button data-tab="spill">2 · Spillover</button>
-      <button data-tab="place">3 · Placement</button>
-      <button data-tab="fly">4 · Fly brain</button>
+      <button data-tab="sense" class="on">Overview</button>
+      <button data-tab="spill">Spillover</button>
+      <button data-tab="place">Placement</button>
+      <button data-tab="fly">Fly brain</button>
     </nav>
 
     <div class="tab on" id="tab-sense">
       <div class="kpis">
-        <div class="kpi"><div class="k-lbl">Spots read right, whole map</div><div class="k-val" id="kMap">–</div><div class="k-sub" id="kMapSub"></div></div>
-        <div class="kpi"><div class="k-lbl">Unsensed spots, Brier error</div><div class="k-val" id="kBrier">–</div><div class="k-sub" id="kBrierSub"></div></div>
+        <div class="kpi"><div class="k-lbl">Unsensed spots · accuracy</div><div class="k-val" id="kMap">–</div><div class="k-sub" id="kMapSub"></div></div>
+        <div class="kpi"><div class="k-lbl">Probability error · Brier</div><div class="k-val" id="kBrier">–</div><div class="k-sub" id="kBrierSub"></div></div>
       </div>
       <div class="chartcard">
         <div class="charthead">
-          <b>Sensor density vs accuracy</b>
+          <b>How much do sensors improve the map?</b>
           <select id="metric">
+            <option value="acc" selected>Unsensed accuracy</option>
             <option value="map">Whole-map accuracy</option>
             <option value="brier">Unsensed spots: Brier error</option>
             <option value="free">Free-spot count error per lot</option>
@@ -91,7 +98,13 @@
         <div id="chartDensity" class="chart"></div>
         <div class="chartnote" id="densityNote"></div>
       </div>
+      <div class="sectionTitle">Your parking options <span>official capacities · inferred availability</span></div>
       <table class="lots" id="lotTable"></table>
+      <details class="dataNotes"><summary>Data sources & assumptions</summary>
+        <button id="refreshOfficial" class="sourceRefresh">Check official NCSU API</button>
+        <div id="officialStatus" class="fine" aria-live="polite">Cached official geometry and capacity. Spot positions estimated.</div>
+        <p class="fine">Occupancy is simulated with fixed seeds. Accuracy is measured only on unsensed spots; observations are excluded from that score.</p>
+      </details>
       <p class="fine">Model: spots fill roughly in order of attractiveness, so a few sensed spots pin down one fill level per lot. Naive baseline: every unsensed spot gets the occupied share of the sensed ones.</p>
     </div>
 
@@ -111,7 +124,7 @@
     </div>
 
     <div class="tab" id="tab-place">
-      <p class="lead">One Park Shark sensor (about $65) sees a group of 10 to 15 neighboring spots. With the same budget, <b>where</b> you put them changes how much of the lot you can read.</p>
+      <p class="lead">Compare simulated 12-spot sensor clusters. With the same observation budget, <b>where</b> sensors sit changes how much of the lot the model can infer.</p>
       <div class="seg" id="placeSeg">
         <button data-s="entrance">Entrance</button><button data-s="spread">Spread</button><button data-s="frontier">Fill frontier</button><button data-s="scatter">Scattered</button>
       </div>
@@ -123,19 +136,40 @@
     </div>
 
     <div class="tab" id="tab-fly">
+      <details class="chartcard connectionCard"><summary>Live location & data</summary>
+        <div id="connectionStatus" aria-live="polite"></div>
+        <button id="connectFly" class="primary">Connect live location</button>
+        <div id="locationStatus" class="fine" aria-live="polite">GPS is processed here, never saved by Parkfly. Basemap providers receive map-area requests.</div>
+        <p class="fine">GPS updates estimated trip cost → sugar / bitter / looming → MN9 / MDN / Giant Fibre. Parking occupancy is simulated.</p>
+      </details>
+      <div class="row brainControls">
+        <label>Encoder <select id="brainMode"><option value="calibrated">Calibrated on training days</option><option value="original">Original encoder</option></select></label>
+      </div>
       <div class="row">
         <label>Driver <select id="persona"><option value="commuter">Commuter with a C permit</option><option value="visitor">Visitor, no permit</option></select></label>
         <label class="chk lesion"><input id="lesion" type="checkbox"> Lesion Giant Fibre</label>
       </div>
+      <div class="decisionStats">
+        <div><span>Finds a free spot</span><strong id="flyAccuracy">—</strong><small id="flyAccuracySub"></small></div>
+        <div><span>Walk + full-lot penalty</span><strong id="flyMinutes">—</strong><small id="flyMinutesSub"></small></div>
+      </div>
       <div id="flyHeadline" class="headline"></div>
-      <div id="flyLots" class="flylots"></div>
+
+      <div class="neuralProvenance" id="neuralSummary"></div>
       <div class="gauges" id="gauges"></div>
+      <div class="chartcard accuracyCard"><div class="charthead"><b>Fly decision accuracy</b><span class="badge sim">SIMULATED TEST</span></div>
+        <div id="chartFlyAccuracy" class="chart"></div><p id="flyAccuracyNote" class="chartnote"></p><details class="accuracyMethod"><summary>How accuracy was measured</summary><p id="accuracyMethodNote" class="fine"></p></details>
+      </div>
+
+      <details class="lotComparisons"><summary>Compare lot responses</summary><div id="flyLots" class="flylots"></div></details>
       <div class="chartcard"><div class="charthead"><b>The brain, firing</b><span class="mut" id="rasterLbl"></span></div>
         <canvas id="raster" width="840" height="230"></canvas>
         <div class="chartnote">Recorded spikes from a full-brain run with tastes like this lot's (three recorded cases; the nearest one plays).</div></div>
       <div class="chartcard"><div class="charthead"><b>Does the fly park well?</b><span class="mut">minutes lost, lower is better</span></div>
         <div id="chartDecision" class="chart short"></div>
         <div class="chartnote" id="decisionNote"></div></div>
+      <details class="prov"><summary>Real fly-brain network</summary><div id="networkGraph"></div><p class="fine" id="networkNote"></p></details>
+      <details class="prov"><summary>Simulator settings & libraries</summary><div id="simulatorInfo"></div><p class="fine"><a href="lab/fly_surface.ipynb" download>Download the reproducible Colab notebook ↗</a> · <a href="lab/README.md" download>Model report & measured results</a> · <a href="lab/demo.html" target="_blank" rel="noopener">Live demo, video & Q&A</a></p></details>
       <details class="prov"><summary>Where the fly's answers come from</summary><div id="prov"></div></details>
     </div>
 
@@ -144,6 +178,9 @@
 </main>
 
 <script src="vendor/leaflet.js"></script>
+<script src="vendor/Leaflet.GoogleMutant.js"></script>
+<script>window.PARKFLY_CONFIG = window.PARKFLY_CONFIG || {};</script>
+<script src="basemap.js"></script>
 <script src="model.js"></script>
 <script src="app.js"></script>
 </body>

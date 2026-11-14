@@ -26,7 +26,7 @@ PAY_RATE_HR = 2.0     # ASSUMED visitor pay rate ($/h); the GIS feed has no pric
 # Focus lots: real NCSU features near Hunt Library, picked by distance and type (see ASSUMPTIONS.md)
 FOCUS = ["Poulton Deck - Visitor Pay Area", "Poulton Deck - C", "Partners I Lot", "Main Campus Drive - C",
          "Textiles Lot", "E.B. III / Entrepreneur Drive", "Research Drive"]
-CONTEXT_RADIUS_M = 1500
+CONTEXT_RADIUS_M = 100000  # render all official campus lots; fit map to focus lots
 
 
 def fetch(url, dest, data=None, timeout=40):
@@ -66,6 +66,9 @@ def main():
     els = osm()
     dest = {"name": "Hunt Library", "lat": HUNT_FALLBACK[0], "lon": HUNT_FALLBACK[1],
             "basis": "approximate (OSM lookup failed)"}
+    destinations_path = os.path.join(DATA, "destinations.json")
+    destinations = json.load(open(destinations_path)) if os.path.exists(destinations_path) else {"hunt": dest}
+    dest = destinations.get("hunt", dest)
     roads = []
     if els:
         for e in els:
@@ -87,6 +90,8 @@ def main():
     context = []
     for f in fc["features"]:
         p = f["properties"]
+        if not (p.get("SPACES") or 0) > 0 or str(p.get("STATUS", "")).lower() not in ("existing", "active"):
+            continue
         g = geom_m(f)
         if not g.is_valid:
             g = g.buffer(0)
@@ -149,7 +154,12 @@ def main():
         })
         print(f"  {name:36s} {n:4d} spaces  walk {lots[-1]['walk_min']:4.1f} min  {method}")
 
-    jdump({"generated_at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
+    facilities = {}
+    for l in lots:
+        physical = l["name"].split(" - ")[0] if "deck" in l["name"].lower() else l["name"]
+        l["physical_facility"] = physical
+        facilities.setdefault(physical, []).append({"name":l["name"],"spaces":l["spaces"],"zone":l["zone"],"pay":l["pay"]})
+    jdump({"destinations": destinations, "facilities": facilities, "generated_at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
            "source": "NCSU Transportation GIS (official polygons and space counts); stall positions estimated",
            "source_url": NCSU_URL, "dest": dest, "lots": lots, "context": context,
            "assumptions": {"pay_rate_hr": PAY_RATE_HR, "walk": "straight line x1.35 at 80 m/min",

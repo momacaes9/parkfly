@@ -153,3 +153,10 @@ data/fly/
 data/birmingham/
 __pycache__/
 .vercel
+
+# Local browser API configuration and credentials
+web/config.js
+*.partial.json
+data/parking_birmingham.zip
+web/.vercel/
+.env*

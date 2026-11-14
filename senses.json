@@ -1,123 +1,55 @@
 {
- "scenario": "sat 10:00 -> Riddick Hall (Hack Day venue)",
- "persona": "student driving to Hack Day, no NCSU permit",
- "lots": [
-  {
-   "lot": "Coliseum Parking Deck [SEED - approx]",
-   "walk_min": 6.9,
-   "sugar_hz": 114,
-   "bitter_hz": 200,
-   "looming_hz": 28,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.006,
-    "occ": 0.258
-   }
+  "scenario": "SIMULATED weekday-1, 10:00, 25% scattered sensors, RNG 25",
+  "persona": "commuter with a C permit, Hunt Library",
+  "encoder": {
+    "walk_scale": 2.0,
+    "uncertainty_gain": 0.5,
+    "loom_gain": 0.5,
+    "near_full_gain": 1.0
   },
-  {
-   "lot": "Dan Allen Parking Deck [SEED - approx]",
-   "walk_min": 5.8,
-   "sugar_hz": 128,
-   "bitter_hz": 200,
-   "looming_hz": 28,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.006,
-    "occ": 0.258
-   }
-  },
-  {
-   "lot": "Riddick Lot [SEED - approx]",
-   "walk_min": 1.7,
-   "sugar_hz": 200,
-   "bitter_hz": 0,
-   "looming_hz": 0,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.004,
-    "occ": 0.167
-   }
-  },
-  {
-   "lot": "Jeter Drive Lot [SEED - approx]",
-   "walk_min": 7.0,
-   "sugar_hz": 112,
-   "bitter_hz": 0,
-   "looming_hz": 0,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.004,
-    "occ": 0.167
-   }
-  },
-  {
-   "lot": "Brooks Hall Lot [SEED - approx]",
-   "walk_min": 10.4,
-   "sugar_hz": 76,
-   "bitter_hz": 0,
-   "looming_hz": 0,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.004,
-    "occ": 0.167
-   }
-  },
-  {
-   "lot": "Hillsborough Visitor Spaces [SEED - approx]",
-   "walk_min": 6.1,
-   "sugar_hz": 124,
-   "bitter_hz": 200,
-   "looming_hz": 150,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.018,
-    "occ": 0.351
-   }
-  },
-  {
-   "lot": "Partners Way Deck (Centennial) [SEED - approx]",
-   "walk_min": 29.8,
-   "sugar_hz": 0,
-   "bitter_hz": 200,
-   "looming_hz": 28,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.006,
-    "occ": 0.258
-   }
-  },
-  {
-   "lot": "Oval Drive West Lot (Centennial) [SEED - approx]",
-   "walk_min": 29.1,
-   "sugar_hz": 1,
-   "bitter_hz": 200,
-   "looming_hz": 0,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.004,
-    "occ": 0.167
-   }
-  },
-  {
-   "lot": "Varsity Lot [SEED - approx]",
-   "walk_min": 24.0,
-   "sugar_hz": 10,
-   "bitter_hz": 0,
-   "looming_hz": 0,
-   "basis": {
-    "p_free": 1.0,
-    "permit_risk": 0.0,
-    "fill_per_hr": 0.004,
-    "occ": 0.167
-   }
-  }
- ]
+  "source": "Computed posterior from official NCSU capacity and simulated occupancy; no live sensor feed",
+  "lots": [
+    {
+      "lot": "Poulton Deck - C",
+      "walk_min": 1.3,
+      "sugar_hz": 99.26914468338992,
+      "bitter_hz": 13.810375362771534,
+      "looming_hz": 15.631066462138415
+    },
+    {
+      "lot": "Partners I Lot",
+      "walk_min": 2.6,
+      "sugar_hz": 49.26046449006968,
+      "bitter_hz": 12.245240684049676,
+      "looming_hz": 19.583757452787403
+    },
+    {
+      "lot": "Main Campus Drive - C",
+      "walk_min": 3.5,
+      "sugar_hz": 34.4805662915067,
+      "bitter_hz": 15.809434228217974,
+      "looming_hz": 11.950042715928443
+    },
+    {
+      "lot": "Textiles Lot",
+      "walk_min": 3.3,
+      "sugar_hz": 12.558838398156743,
+      "bitter_hz": 5.274641371437497,
+      "looming_hz": 39.913714299338906
+    },
+    {
+      "lot": "E.B. III / Entrepreneur Drive",
+      "walk_min": 6.1,
+      "sugar_hz": 7.0083444181169146,
+      "bitter_hz": 11.586065237297612,
+      "looming_hz": 40.80710927929388
+    },
+    {
+      "lot": "Research Drive",
+      "walk_min": 6.1,
+      "sugar_hz": 9.328716305696275,
+      "bitter_hz": 17.949893153051775,
+      "looming_hz": 6.569369886942826
+    }
+  ]
 }

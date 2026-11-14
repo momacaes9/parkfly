@@ -1,0 +1,76 @@
+const path=require('path'),ROOT=path.resolve(__dirname,'..');
+const {chromium}=require('playwright');
+const assert=require('assert/strict');const fs=require('fs');
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.BROWSER_PATH || '/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ const context=await browser.newContext({viewport:{width:1366,height:768},ignoreHTTPSErrors:true});
+ const p=await context.newPage(), errors=[], consoleErrors=[], failed=[];
+ p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+ p.on('response',r=>{if(r.status()>=400)failed.push([r.status(),r.url()])});
+ await p.goto(process.env.TEST_URL || 'http://127.0.0.1:8765',{waitUntil:'networkidle'});
+ await p.waitForSelector('#lotTable tr[data-i]');
+ assert.equal(await p.locator('#lotTable tr[data-i]').count(),7);
+ assert.match(await p.locator('.logo').innerText(),/PARKFLY/);assert.doesNotMatch(await p.locator('body').innerText(),/Park Shark/i);
+ await p.getByText('Map key',{exact:true}).click();await p.getByText('Map key',{exact:true}).click();
+ const slider=async(id,value)=>p.locator('#'+id).evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
+ const timings=[];
+ for(const value of [0,25,100]){
+  const ms=await p.locator('#pct').evaluate((el,value)=>{const t=performance.now();el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));return performance.now()-t},value);
+  timings.push({value,ms});assert.equal(await p.locator('#pctVal').innerText(),value+'%');
+ }
+ assert.equal(await p.locator('#kBrier').innerText(),'n/a');
+ await slider('pct',25);
+ for(const option of ['entrance','spread','frontier','scatter'])await p.selectOption('#strategy',option);
+ await p.click('#reshuffle');
+ for(const metric of ['brier','free','map','acc'])await p.selectOption('#metric',metric);
+ await slider('time',60);assert.equal(await p.locator('#clock').innerText(),'11:00 AM');
+ await p.selectOption('#day','4');await p.selectOption('#day','0');
+ await p.check('#truth');await p.uncheck('#truth');
+ await p.click('#play');await p.waitForTimeout(400);await p.click('#play');assert.notEqual(await p.locator('#time').inputValue(),'60');
+ await p.click('[data-tab="spill"]');await p.click('#wholeList button[data-i="2"]');assert.match(await p.locator('#wholeList button[data-i="2"]').getAttribute('class'),/on/);
+ await p.uncheck('#spillOn');await p.check('#spillOn');await p.click('#clearWhole');
+ assert.equal(await p.locator('#wholeList button.on').count(),0);
+ assert.match(await p.locator('#bhamHeadline').innerText(),/28 real car parks/);
+ assert.equal(await p.locator('svg [points*="NaN"]').count(),0);
+ await p.click('[data-tab="place"]');for(const strategy of ['entrance','spread','frontier','scatter'])await p.click('#placeSeg [data-s="'+strategy+'"]');
+ await p.click('[data-tab="fly"]');await p.selectOption('#brainMode','original');await p.selectOption('#brainMode','calibrated');await p.selectOption('#persona','visitor');await p.selectOption('#persona','commuter');
+ await p.getByText('Compare lot responses',{exact:true}).click();await p.locator('#flyLots .fl').last().click();await p.check('#lesion');await p.uncheck('#lesion');
+ await p.getByText('How accuracy was measured',{exact:true}).click();assert.match(await p.locator('#accuracyMethodNote').innerText(),/14 training days/);
+ await p.getByText('Simulator settings & libraries',{exact:true}).click();assert.match(await p.locator('#simulatorInfo').innerText(),/NumPy/);
+ const notebookStatus=await p.evaluate(async url=>(await fetch(url)).status,new URL('lab/fly_surface.ipynb',process.env.TEST_URL || 'http://127.0.0.1:8765').href);assert.equal(notebookStatus,200);
+ await p.getByText('Real fly-brain network',{exact:true}).click();assert.ok(await p.locator('#networkGraph path').count()>0);await p.getByText("Where the fly's answers come from",{exact:true}).click();assert.match(await p.locator('#prov').innerText(),/138,639/);
+ await p.click('#demoBtn');assert.match(await p.locator('#capStep').innerText(),/1 \/ 6/);
+ for(let i=0;i<4;i++)await p.keyboard.press('ArrowRight');
+ assert.match(await p.locator('#capStep').innerText(),/5 \/ 6/);
+ const scene=JSON.parse(fs.readFileSync(path.join(ROOT,'web/data/lesion_scene.json')));
+ const chip=p.locator('#flyLots .fl[data-i="'+scene.lot+'"] .chip');
+ assert.equal(await chip.innerText(),'DIVERT');const before=await p.locator('#gauges').innerText();
+ await p.check('#lesion');assert.equal(await chip.innerText(),'COMMIT');assert.ok(await p.locator('#networkGraph path[stroke-dasharray]').count()>0);const after=await p.locator('#gauges').innerText();
+ await p.screenshot({path:path.join(ROOT,'results/lesion-demo.png'),fullPage:true});
+ await p.keyboard.press('ArrowRight');await p.keyboard.press('ArrowLeft');await p.click('#capPrev');await p.click('#capNext');
+ await p.keyboard.press('Escape');assert.equal(await p.locator('#caption').isVisible(),false);
+ await p.click('#demoBtn');await p.click('#capExit');
+ // NCSU official API button: the direct public endpoint is used by the local static server.
+ await p.selectOption('#destination','riddick');await p.selectOption('#destination','hunt');
+ await p.click('[data-tab="sense"]');await p.getByText('Data sources & assumptions',{exact:true}).click();await p.click('#refreshOfficial');await p.waitForFunction(()=>!document.querySelector('#refreshOfficial').disabled,{timeout:15000});
+ const official=await p.locator('#officialStatus').innerText();
+ await p.click('[data-tab="sense"]');await slider('time',48);await slider('pct',25);
+ await p.screenshot({path:process.env.SCREENSHOT_PATH || path.join(ROOT,'results/demo-screenshot.png'),fullPage:true});
+ // Map buttons, lot zoom and manual basemap control.
+ await p.locator('#lotTable tr[data-i="2"]').click();await p.waitForTimeout(700);
+ await p.click('.leaflet-control-zoom-out');await p.click('.leaflet-control-zoom-in');
+ await p.locator('.leaflet-control-layers').hover();await p.getByText('Carto light',{exact:true}).click();
+ await p.waitForTimeout(500);
+ // Fully offline: local files loaded, both external providers blocked, finite fallback.
+ const offline=await browser.newContext({viewport:{width:1366,height:768}}),q=await offline.newPage();
+ const offErrors=[];q.on('pageerror',e=>offErrors.push(e.message));
+ await q.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8765')?route.continue():route.abort());
+ await q.goto('http://127.0.0.1:8765');await q.waitForSelector('#lotTable tr[data-i]');
+ await q.waitForFunction(()=>document.querySelector('.bmlabel')?.textContent.includes('Offline'),{timeout:15000});
+ await q.locator('#pct').evaluate(el=>{el.value=75;el.dispatchEvent(new Event('input'))});assert.equal(await q.locator('#pctVal').innerText(),'75%');
+ await q.screenshot({path:path.join(ROOT,'results/offline-demo.png'),fullPage:true});
+ assert.deepEqual(errors,[]);assert.deepEqual(offErrors,[]);
+ const report={passed:true,viewport:'1366x768',timings,official,before,after,pageErrors:errors,consoleErrors,httpFailures:failed,offlinePageErrors:offErrors,controls:'all tabs, sliders, placement modes, day/scenario, truth, play/pause, whole-lot sensors, spillover, persona, lesion, provenance, six demo beats/arrows/Escape, map zoom/layers, official API check'};
+ fs.writeFileSync(process.env.REPORT_PATH || path.join(ROOT,'results/browser-verification.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

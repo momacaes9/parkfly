@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Park Shark · NC State</title>
+<title>ParkFly · NC State</title>
 <link rel="stylesheet" href="vendor/leaflet.css"/>
 <style>
 :root{--navy:#0D3F5A;--rust:#D8814B;--ink:#1b2630;--line:#e3e7ea;--bg:#f4f6f7;--good:#2f9e55;--warn:#d9a226;--bad:#cc4b3c}
@@ -128,9 +128,11 @@ html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Seg
 </head>
 <body>
 <div id="map"></div>
+<div style="position:fixed;bottom:0;left:0;z-index:2000;background:#F5F0E8;color:#0D3F5A;padding:4px 10px;font-size:11px;max-width:100%">V6 collaboration preview · official geometry · simulated occupancy and stall layouts · imported neural exports · <a href="METHODOLOGY.md">Methodology</a></div>
 
 <div class="pill-bar">
-  <button class="pbtn brand" id="panelToggle" onclick="togglePanel()">🦈 Park Shark</button>
+  <button class="pbtn brand" id="panelToggle" onclick="togglePanel()">🪰 ParkFly</button>
+  <a class="pbtn" href="/">Simulation lab ↗</a>
   <div class="sep"></div>
   <button class="pbtn on" id="dayWD" onclick="setDay('weekday')">Weekday</button>
   <button class="pbtn" id="daySat" onclick="setDay('sat')">Sat</button>
@@ -313,10 +315,11 @@ function onPrefChange(){
   usingRealBrain = DEST.isDefault && prefsAreDefault();
   updateBrainModeNote(); render();
 }
+function brainRunMatches(){ return usingRealBrain && HOUR === DECISIONS_ALL[DAY]?.hour; }
 function updateBrainModeNote(){
-  document.getElementById('brainModeNote').textContent = usingRealBrain
-    ? 'Using the real 138,639-neuron connectome run, precomputed for the Hack Day trip.'
-    : 'Destination/preferences changed: scores below recompute live from the same sense formulas. The full connectome run stays precomputed for the default Hack Day trip — see Release 3 Flies.';
+  document.getElementById('brainModeNote').textContent = brainRunMatches()
+    ? 'Imported V6 connectome export: precomputed for the default Hack Day trip at 10am. Not a live brain run.'
+    : 'Heuristic fallback: hour, destination or preferences differ from the recorded brain run. Scores recompute from sense formulas, not neuron simulation. The full connectome run stays precomputed for the default Hack Day trip — see Release 3 Flies.';
 }
 function resetDest(){
   DEST = ALL_DESTS[0]; usingRealBrain = true;
@@ -364,7 +367,7 @@ function computeAllDecisions(){
   return out;
 }
 function decisionsNow(){
-  if(usingRealBrain){ const d={}; (DECISIONS_ALL[DAY]?.decisions||[]).forEach(r=>d[r.lot]=r); return d; }
+  if(brainRunMatches()){ const d={}; (DECISIONS_ALL[DAY]?.decisions||[]).forEach(r=>d[r.lot]=r); return d; }
   return computeAllDecisions();
 }
 function renderDestMarker(){
@@ -377,6 +380,7 @@ function drawRoute(lot){
 }
 
 function render(){
+  updateBrainModeNote();
   lotLayer.clearLayers();
   const decByLot = decisionsNow();
   DATA.lots.forEach(l=>{

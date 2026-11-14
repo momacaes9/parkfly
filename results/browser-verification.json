@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "viewport": "1366x768",
+  "timings": [
+    {
+      "value": 0,
+      "ms": 17.200000000186265
+    },
+    {
+      "value": 25,
+      "ms": 11
+    },
+    {
+      "value": 100,
+      "ms": 10.399999999441206
+    }
+  ],
+  "official": "Official API verified: 214 polygons. Focus-lot capacities match the cached snapshot. No live occupancy is supplied.",
+  "before": "DIVERT Fly brain reading E.B. III: sugar 80 Hz (chance of a spot × short walk), bitter 20 Hz (uncertainty 13%), looming 44 Hz (filling fast / full)\nMN9 eat → commit\n4 Hz\nMDN walk back → back off\n0 Hz\nGiant Fibre escape → divert\n146 Hz",
+  "after": "COMMIT Fly brain reading E.B. III: sugar 80 Hz (chance of a spot × short walk), bitter 20 Hz (uncertainty 13%), looming 44 Hz (filling fast / full)\nMN9 eat → commit\n6 Hz\nMDN walk back → back off\n0 Hz\nGiant Fibre escape → divert\n0 Hz",
+  "pageErrors": [],
+  "consoleErrors": [],
+  "httpFailures": [],
+  "offlinePageErrors": [],
+  "controls": "all tabs, sliders, placement modes, day/scenario, truth, play/pause, whole-lot sensors, spillover, persona, lesion, provenance, six demo beats/arrows/Escape, map zoom/layers, official API check"
+}

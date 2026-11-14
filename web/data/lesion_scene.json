@@ -1,0 +1,27 @@
+{
+  "label": "Selected from held-out SIMULATED weekdays. Near-full lot, not a collision forecast.",
+  "shuffle": 1,
+  "search_cases": 1797,
+  "script": "pipeline/find_lesion_scene.cjs",
+  "day": 0,
+  "ti": 46,
+  "pct": 25,
+  "lot": 5,
+  "free": 5,
+  "future": 0,
+  "hz": [
+    79.53217464245496,
+    20.183917424459597,
+    44.416666666666586
+  ],
+  "intact": {
+    "mn9": 4.132277086569651,
+    "giant_fibre": 146.1314497598624,
+    "mdn": 0.06165416264961732
+  },
+  "lesion": {
+    "mn9": 6.216077835018672,
+    "giant_fibre": 0,
+    "mdn": 0
+  }
+}

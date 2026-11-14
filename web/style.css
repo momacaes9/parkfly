@@ -1,4 +1,4 @@
-/* ParkFly. Palette and type from parkshark.netlify.app. */
+/* ParkFly simulation lab. */
 :root{
   --navy:#0d1f3c; --navy-mid:#132a50; --navy-light:#1a3566;
   --orange:#e07b39; --orange-hi:#f08c48; --cream:#f5f0e8; --white:#fff;
@@ -141,3 +141,53 @@ table.lots .rng{color:var(--gray-light);font-size:12px}
 #foot b{color:var(--cream)}
 @media (max-width:1180px){#panel{width:410px}.sub{display:none}}
 @media (max-width:860px){body{overflow:auto}main{flex-direction:column}#mapwrap{height:62vh;flex:none}#panel{width:100%}#top{flex-wrap:wrap}}
+
+/* Projector theme. Keep the map and panels legible on venue wifi. */
+:root{--navy:#0D3F5A;--navy-mid:#164E69;--navy-light:#24647F;--orange:#D8814B;--orange-hi:#C16C38;--cream:#F5F0E8;--gray:#657C89;--gray-light:#536B77;--card:#fffaf2;--border:rgba(13,63,90,.15);--border-mid:rgba(13,63,90,.25)}
+body{background:var(--cream);color:var(--navy)}
+#top{background:var(--navy);color:white}.sub,.sensorhead .lbl,.sensorhead .note,.topctl label{color:#DCE6E8}
+#panel{background:var(--cream)}
+button,select{background:var(--cream);color:var(--navy)}button:hover{background:#EADFD0}button.primary{color:#fff}button.primary:hover{background:#C16C38}
+.topctl select{color:var(--navy)}
+.tabs button.on,.k-sub b,.gauges .gt b{color:var(--navy)}
+.legend,.timebar{background:rgba(245,240,232,.97);color:var(--navy)}
+.lg-title,.timebar #clock,.lead,.headline,.prov summary,#foot b{color:var(--navy)}
+.leaflet-container,#map,#mapwrap{background:#E6E1D6}
+.darktiles{filter:none}
+.lotlabel .ll{background:rgba(13,63,90,.96)}
+.lotlabel .ll .rng{color:#DCE6E8}
+.chip.COMMIT{color:#237141;border-color:#237141}.chip.DIVERT{color:#B33232;border-color:#B33232}.chip.BACK{color:#946000;border-color:#946000}
+.badge.real{color:#237141;border-color:#237141}.badge.sim{color:#946000;border-color:#946000}
+.wholelist button.on{background:var(--navy);color:#fff}.seg button.on{color:#fff}
+.tb .bar,.gz .bar{background:rgba(13,63,90,.12)}
+.bmlabel{background:var(--cream);color:var(--navy);padding:4px 8px;border:1px solid var(--border-mid);border-radius:5px;font:12px Barlow,sans-serif}
+#foot{background:var(--cream)}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+@media(max-width:860px){.sensorbox{min-width:220px}.timebar{flex-wrap:wrap}.timebar #day{max-width:180px}#panel{height:auto;min-height:650px}.tab{overflow:visible}#mapwrap{min-height:500px}.legend{max-width:230px;font-size:12px}.logo{font-size:22px}.sensorhead .note{font-size:12px}}
+.sourceRefresh{font-size:12px;padding:3px 7px;margin-top:7px;background:#fff}
+.sourceRefresh:disabled{opacity:.6;cursor:wait}
+.destinationLabel{display:flex;align-items:center;gap:7px;font-size:12px;margin-top:4px;color:#DCE6E8}
+.destinationLabel select{font-size:12px;padding:2px 5px;max-width:210px}
+@media(max-width:600px){#top{gap:12px;padding:10px 12px}.logo{white-space:normal;font-size:21px}.sensorbox{flex-basis:100%;min-width:0}.topctl{width:100%;flex-wrap:wrap;gap:7px}.topctl label{flex:1;min-width:170px}.timebar{gap:7px}.timebar #clock{min-width:90px;font-size:18px}.timebar input[type=range]{min-width:90px}.legend{max-width:190px;font-size:11px;padding:7px 9px}.lg-note{font-size:11px}.sourceRefresh{font-size:11px}#capText{font-size:15px}.capnav{gap:5px}.capnav button{padding:4px 7px}#panel{min-height:760px}.gz{grid-template-columns:140px 1fr 55px}.fl{grid-template-columns:1fr 105px 77px;font-size:12px}.tab{padding:12px}#foot{font-size:11px}}
+.locationControls{display:flex;gap:6px;margin-top:8px}.locationControls button{font-size:12px;padding:4px 7px}.locationControls #locate{background:var(--navy);color:#fff}
+#locationStatus{max-width:235px}
+@media(max-width:600px){.locationControls{flex-wrap:wrap}.locationControls button{font-size:11px}.legend .lg-note{line-height:1.25}#locationStatus{font-size:10px}}
+.destlabel{max-width:220px;white-space:normal}
+.connectionCard{border-color:var(--orange)}.connectionRow{display:flex;gap:8px;align-items:center;font-size:13px;margin:7px 0}.connectionRow i{flex:none;width:8px;height:8px;border-radius:50%;background:#87959D}.connectionRow i.connected{background:#237141;box-shadow:0 0 0 3px #23714115}#connectFly{margin-top:5px;font-size:13px}
+
+/* Focused dashboard: actions on the map, research detail in the panel. */
+#top{gap:18px;padding:12px 18px}.logo{font-size:23px}.sub{font-size:11px;max-width:270px}.sensorhead .lbl{font-size:11px;letter-spacing:.8px}.pct{font-family:Barlow,sans-serif;font-size:32px;font-weight:700}.sensorhead .note{font-size:11px}.topctl{gap:8px}
+#panel{width:450px}.tabs button{font-size:13px;padding:13px 5px}.tab{padding:16px 18px}.kpis{gap:12px;margin-bottom:16px}.kpi{border:0;background:#fff;padding:13px 14px;border-radius:12px;box-shadow:0 1px 5px #0D3F5A08}.k-lbl{font-size:10px;letter-spacing:.7px}.k-val{font-family:Barlow,sans-serif;font-size:34px;font-weight:700;margin:5px 0}.k-sub{font-size:12px}.chartcard{background:#fff;border:1px solid #0D3F5A10;border-radius:12px;padding:13px 14px;margin-bottom:16px}.charthead{align-items:flex-start;flex-wrap:wrap;font-size:14px;gap:7px}.charthead select{font-size:12px}.chartnote{font-size:12px;line-height:1.5}.sectionTitle{font-weight:700;font-size:15px;margin:20px 0 8px}.sectionTitle span{display:block;font-size:11px;color:var(--gray);font-weight:400;margin-top:3px}
+.maptools{position:absolute;left:16px;top:16px;z-index:500;display:flex;gap:6px;align-items:center;background:#fffef9ef;border:1px solid var(--border);padding:5px;border-radius:10px;box-shadow:0 3px 15px #0D3F5A12}.maptools button{font-size:12px;padding:6px 10px;background:transparent;border:0}.maptools #locate{background:var(--navy);color:#fff}.maptools span{font-size:11px;color:var(--gray);padding:0 6px}.mapSource{position:absolute;left:16px;top:66px;z-index:500;font-size:10px;letter-spacing:.6px;color:var(--navy);background:#fffef9ed;padding:5px 8px;border-radius:5px;font-weight:600}.mapSource span{font-weight:400;letter-spacing:0}
+.legend{left:16px;top:auto;bottom:87px;max-width:225px;min-width:100px;padding:8px 11px;font-size:12px;background:#fffef9f5;border-radius:8px;line-height:1.9}.legend summary{cursor:pointer;font-size:12px;font-weight:600}.legend[open] summary{margin-bottom:5px}.legend .lg-note{font-size:11px}.timebar{left:16px;right:16px;bottom:15px;background:#fffef9f5;border-radius:11px;padding:9px 11px;gap:9px}.timebar #clock{font-family:Barlow,sans-serif;font-size:18px;font-weight:600;min-width:90px}.timebar select{font-size:12px}.timebar .chk{font-size:12px}
+.lotlabel .ll{font-size:11px;background:#fffef9f5;color:var(--navy);border:1px solid #0D3F5A35;padding:5px 9px;border-radius:8px;box-shadow:0 2px 8px #0D3F5A20;line-height:1.3}.lotlabel .ll b{display:block;font-size:11px;font-weight:600}.lotlabel .ll .fr{color:var(--navy);font-size:12px}.lotlabel .ll.pick{background:var(--navy);color:#fff;border-color:var(--orange);box-shadow:0 0 0 2px #D8814B50}.lotlabel .ll.pick .fr{color:#9BE9B3}.lotlabel .ll .rng{color:var(--gray);font-size:10px}.lotlabel .ll .vd{display:none}.lotlabel .ll.whole{border:2px solid #D8814B}.destlabel{font-size:11px;padding:4px 8px;max-width:175px}
+table.lots{font-size:12px}table.lots td{padding:9px 4px}table.lots th{font-size:10px}.dataNotes{border-top:1px solid var(--border);margin:15px 0;padding-top:12px}.dataNotes summary{font-size:12px;font-weight:600;cursor:pointer}.dataNotes .fine{font-size:12px}#foot{font-size:10px;padding:9px 14px;line-height:1.5}.lead{font-size:14px;line-height:1.6}.fine{font-size:12px}
+.connectionCard{padding:11px 13px;border-left:3px solid var(--orange)}.connectionRow{font-size:11px;margin:5px 0}.connectionCard .fine{font-size:11px;line-height:1.45}.decisionStats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.decisionStats>div{background:#fff;border-radius:12px;padding:13px 14px}.decisionStats span{display:block;font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}.decisionStats strong{display:block;font-size:28px;line-height:1.25;color:var(--navy);margin:6px 0}.decisionStats small{font-size:11px;color:var(--gray);line-height:1.4;display:block}.brainControls label{width:100%}.brainControls select{flex:1;font-size:12px}.accuracyCard .badge{font-size:9px}.flylots{gap:6px}.fl{padding:8px;font-size:12px}.fl .nm{font-size:12px}.fl .nm small{font-size:10px}.chip{font-size:10px}.gz{font-size:12px;grid-template-columns:140px 1fr 55px}#locationStatus{max-width:none}
+@media(max-width:1180px){#panel{width:410px}.tab{padding:14px}.brand .sub{display:none}}
+@media(max-width:860px){#panel{width:100%}.maptools{top:12px;left:12px}.mapSource{top:61px;left:12px}}
+@media(max-width:600px){#top{padding:10px 12px;gap:10px}.maptools button{padding:6px;font-size:11px}.maptools span{font-size:10px;padding:0 3px}.mapSource{font-size:9px}.legend{left:12px;bottom:126px}.timebar{left:10px;right:10px;bottom:12px}.lotlabel .ll{padding:4px 6px}.lotlabel .ll b{font-size:10px}.mapSource span{display:none}.decisionStats{gap:9px}.topctl{width:100%;flex-wrap:wrap}.charthead{font-size:13px}}
+.flymark{font-family:system-ui,sans-serif;font-size:26px;vertical-align:-2px;margin-right:5px}.connectionCard summary{font-size:12px;font-weight:600;cursor:pointer;color:var(--navy)}.connectionCard[open] summary{margin-bottom:10px}.connectionCard{padding:10px 12px}a{color:#1B6785}.logo>span:not(.flymark){color:var(--orange)}
+.lotComparisons{margin:10px 0 14px}.lotComparisons summary{cursor:pointer;color:var(--navy);font-size:12px;font-weight:600}.lotComparisons[open] summary{margin-bottom:9px}#selectedVerdict{display:inline-block;margin-right:5px;padding:2px 5px;font-size:10px}.decisionStats small{min-height:28px}
+.destlabel{width:130px;max-width:130px;text-align:center}
+.accuracyMethod summary{font-size:11px;font-weight:600;cursor:pointer;margin-top:7px}.accuracyMethod .fine{font-size:11px;line-height:1.5}.decisionStats>div{border:1px solid #0D3F5A06}
+.neuralProvenance{font-size:10px;letter-spacing:.3px;color:var(--gray);margin:10px 2px 7px}

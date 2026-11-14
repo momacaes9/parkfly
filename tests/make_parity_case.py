@@ -8,6 +8,7 @@ from common import jload, jdump, ROOT
 
 L, truth, days, geo = evaluate.load()
 fit = truth["fitted"]; nL = len(L); N = [l["spaces"] for l in L]
+calibration = jload("fly_calibration.json")["encoder"]
 rng = np.random.default_rng(42)
 cases = []
 for (di, ti, pct) in [(0, 54, 25), (1, 30, 10), (3, 120, 40), (4, 60, 0)]:
@@ -26,6 +27,9 @@ for (di, ti, pct) in [(0, 54, 25), (1, 30, 10), (3, 120, 40), (4, 60, 0)]:
                             L[i]["price_hr"], 0.0, 0.02) for i in range(nL)]
         hz = [senses.to_hz(t) for t in ts]
         reads = [surf.read(*h) for h in hz]
+        calibrated_hz = [senses.calibrated_hz(t,L[i]["walk_min"]+2,L[i]["price_hr"],0,.02,calibration) for i,t in enumerate(ts)]
+        calibrated_reads = [surf.read(*h) for h in calibrated_hz]
+        calibrated_pick,_ = senses.fly_pick(calibrated_reads,calibrated_hz)
         pick, v = senses.fly_pick(reads, hz)
         cases.append({"day": di, "ti": ti, "period": per, "across": use, "masks": [m.astype(int).tolist() for m in masks],
                       "p_occ": [np.round(p["p_occ"], 6).tolist() for p in post],
@@ -34,5 +38,6 @@ for (di, ti, pct) in [(0, 54, 25), (1, 30, 10), (3, 120, 40), (4, 60, 0)]:
                       "naive": [round(model.naive(occs[i], masks[i]), 6) for i in range(nL)],
                       "tastes": [[round(t[k], 6) for k in ("sugar", "bitter", "loom", "e_free", "sd_free", "p_full")] for t in ts],
                       "reads": [[round(r[k], 4) for k in ("mn9", "giant_fibre", "mdn")] for r in reads],
+                      "calibrated_hz": calibrated_hz, "calibrated_reads": calibrated_reads, "calibrated_pick": int(calibrated_pick),
                       "pick": int(pick), "verdicts": v})
 jdump({"cases": cases}, "parity_case.json", base=os.path.join(ROOT, "tests"))

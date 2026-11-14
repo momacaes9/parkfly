@@ -1,0 +1,6 @@
+# Optional skeleton visualization from the uploaded NC State starter notebook.
+# The full NumPy/SciPy connectome simulation needs no FlyWire token.
+fafbseg==3.2.3
+navis==1.12.0
+plotly
+crackle-codec

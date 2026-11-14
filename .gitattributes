@@ -1,0 +1,3 @@
+# Keep reproducible source archives from recursively including previous ZIPs.
+web/lab/parkfly-source.zip export-ignore
+web/lab/parkfly-changes.bundle export-ignore
