@@ -1,5 +1,9 @@
 # Park Shark x Fly Brain - NC State (Hack Day, Nov 14 2026)
 
+> 🦈🪰 **ParkFly**: sense 25% of the parking spots, infer the other 75%, and let a real 139k-neuron fruit-fly connectome decide where to park.
+>
+> **Build docs for Hack Day:** [`PROMPT.md`](PROMPT.md) is the full build order for Claude (Fable). [`CONTEXT.md`](CONTEXT.md) holds everything behind it: judging rubric, Park Shark brief, fly-brain science and starter code, verified NC State data endpoint, known bugs and the plan.
+
 A hungry fly (the real 139k-neuron FlyWire connectome) hunting the sweetest
 parking spot at NC State. Park Shark's estimator turns each lot into tastes;
 the fly brain decides eat / back off / flee.
