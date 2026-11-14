@@ -1,0 +1,123 @@
+{
+ "scenario": "sat 10:00 -> Riddick Hall (Hack Day venue)",
+ "persona": "student driving to Hack Day, no NCSU permit",
+ "lots": [
+  {
+   "lot": "Coliseum Parking Deck [SEED - approx]",
+   "walk_min": 6.9,
+   "sugar_hz": 114,
+   "bitter_hz": 200,
+   "looming_hz": 28,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.006,
+    "occ": 0.258
+   }
+  },
+  {
+   "lot": "Dan Allen Parking Deck [SEED - approx]",
+   "walk_min": 5.8,
+   "sugar_hz": 128,
+   "bitter_hz": 200,
+   "looming_hz": 28,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.006,
+    "occ": 0.258
+   }
+  },
+  {
+   "lot": "Riddick Lot [SEED - approx]",
+   "walk_min": 1.7,
+   "sugar_hz": 200,
+   "bitter_hz": 0,
+   "looming_hz": 0,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.004,
+    "occ": 0.167
+   }
+  },
+  {
+   "lot": "Jeter Drive Lot [SEED - approx]",
+   "walk_min": 7.0,
+   "sugar_hz": 112,
+   "bitter_hz": 0,
+   "looming_hz": 0,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.004,
+    "occ": 0.167
+   }
+  },
+  {
+   "lot": "Brooks Hall Lot [SEED - approx]",
+   "walk_min": 10.4,
+   "sugar_hz": 76,
+   "bitter_hz": 0,
+   "looming_hz": 0,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.004,
+    "occ": 0.167
+   }
+  },
+  {
+   "lot": "Hillsborough Visitor Spaces [SEED - approx]",
+   "walk_min": 6.1,
+   "sugar_hz": 124,
+   "bitter_hz": 200,
+   "looming_hz": 150,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.018,
+    "occ": 0.351
+   }
+  },
+  {
+   "lot": "Partners Way Deck (Centennial) [SEED - approx]",
+   "walk_min": 29.8,
+   "sugar_hz": 0,
+   "bitter_hz": 200,
+   "looming_hz": 28,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.006,
+    "occ": 0.258
+   }
+  },
+  {
+   "lot": "Oval Drive West Lot (Centennial) [SEED - approx]",
+   "walk_min": 29.1,
+   "sugar_hz": 1,
+   "bitter_hz": 200,
+   "looming_hz": 0,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.004,
+    "occ": 0.167
+   }
+  },
+  {
+   "lot": "Varsity Lot [SEED - approx]",
+   "walk_min": 24.0,
+   "sugar_hz": 10,
+   "bitter_hz": 0,
+   "looming_hz": 0,
+   "basis": {
+    "p_free": 1.0,
+    "permit_risk": 0.0,
+    "fill_per_hr": 0.004,
+    "occ": 0.167
+   }
+  }
+ ]
+}
